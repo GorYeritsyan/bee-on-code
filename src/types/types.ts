@@ -5,9 +5,9 @@ export type CategoryItem = {
 };
 
 export type Category = {
-  name: string;
+  title: string;
   imageUrl?: string;
-  gender: string;
+  gender?: string;
   results?: CategoryItem[];
 };
 

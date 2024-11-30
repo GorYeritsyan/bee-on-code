@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import {useState} from "react";
 
 export type GenderButtonProps = {
   image: string;
@@ -6,7 +7,7 @@ export type GenderButtonProps = {
   title?: string;
 };
 
-const GenderButton = ({ image, className, title }: GenderButtonProps) => {
+const GenderButton = ({ image, className, title }: GenderButtonProps) =>
   return (
     <div
       className={cn(

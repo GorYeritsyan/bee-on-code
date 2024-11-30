@@ -1,7 +1,9 @@
 import {appwriteConfig, databases, storage} from "@/lib/appwrite/config.ts";
 import {ID, ImageGravity} from 'appwrite'
+import {z} from "zod";
+import {formSchema} from "@/components/shared/AddButton.tsx";
 
-export async function createCategory(category: any){
+export async function createCategory(category: z.infer<typeof formSchema>){
     try {
         //Upload image to storage
         const uploadedFile = await uploadFile(category.file[0]);
@@ -21,7 +23,7 @@ export async function createCategory(category: any){
             ID.unique(),
             {
                 imageUrl: fileUrl,
-                name: category.name,
+                title: category.title,
             }
         )
 
@@ -54,8 +56,8 @@ export function getFilePreview(fileId: string){
         const fileUrl = storage.getFilePreview(
             appwriteConfig.storageId,
             fileId,
-            2000,
-            2000,
+            50,
+            50,
             "top" as ImageGravity,
             100
         );
@@ -79,3 +81,13 @@ export async  function deleteFile(fileId: string){
     }
 }
 
+export async function getCategories(){
+    const categories = await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.categoriesCollectionId,
+    )
+
+    if(!categories) throw Error;
+
+    return categories;
+}

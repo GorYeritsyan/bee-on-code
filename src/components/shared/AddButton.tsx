@@ -1,9 +1,34 @@
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import GenderButton from "./GenderButton";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import {Form, FormControl, FormField, FormItem, FormLabel} from "@/components/ui/form.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import FileUploader from "@/components/shared/FileUploader.tsx";
+import {useCreateCategory} from "@/lib/react-query/queriesAndMutations.tsx";
+
+export const formSchema = z.object({
+    file: z.custom<File[]>(),
+    title: z.string()
+})
+
 
 const AddButton = () => {
+   const {mutateAsync: createCategory, isPending} = useCreateCategory()
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            title: "",
+            file: []
+        },
+    })
+
+  async  function onSubmit(values: z.infer<typeof formSchema>) {
+       await createCategory({...values})
+    }
+
   return (
     <Popover>
       <PopoverTrigger
@@ -13,34 +38,39 @@ const AddButton = () => {
       >
         +
       </PopoverTrigger>
-      <PopoverContent className="w-[301px] h-[360px] p-5 flex flex-col">
-        <h1 className="text-base font-semibold">добавить категория</h1>
-        <div className="flex gap-x-[11px] mt-6">
-          <GenderButton
-            title="женский"
-            className="w-full justify-start gap-x-3 px-2 py-1"
-            image="/women.png"
-          />
-          <GenderButton
-            title="мужской"
-            className="w-full justify-start gap-x-3 px-2 py-1"
-            image="/man.png"
-          />
-        </div>
-        <input
-          className="border-b border-[rgba(193,193,193,1)] outline-none text-sm pb-2 mt-3 placeholder:text-[rgba(79,79,79,1)]"
-          placeholder="категория"
-        />
-        <div className="bg-[rgba(79,79,79,0.55)] rounded-[5px] h-[145px] mt-4 flex items-center justify-center">
+      <PopoverContent className="w-[301px] h-[360px] p-5 justify-between flex flex-col">
+        <h2>добавить категория</h2>
+          <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 ">
+                  <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormControl>
+                                      <input
+                                          className='py-2 w-full outline-none border-b-2 text-sm border-b-[rgba(193,193,193,1)]'
+                                          placeholder="категория" {...field} />
+                              </FormControl>
+                          </FormItem>
+                      )}
+                  />
 
-        <Input
-          type="file"
-          name=""
-          id=""
-          className="borde h-full shadow-none file:h-full file:justify-center file:items-center file:w-full file:flex"
-        />
-        </div>
-        <Button className="font-semibold text-base py-[6px] flex justify-center items-center rounded-[25px] bg-[rgba(0,8,193,1)] hover:bg-blue-950 mt-6">добавить</Button>
+                  <FormField
+                      control={form.control}
+                      name="file"
+                      render={({ field }) => (
+                          <FormItem>
+                              <FormControl>
+                                 <FileUploader fieldChange={field.onChange} />
+                              </FormControl>
+                          </FormItem>
+                      )}
+                  />
+                  <Button className='rounded-full w-full text-base font-semibold bg-[rgb(0,8,193)] hover:bg-[rgb(0,8,150)]' type="submit">добавить</Button>
+              </form>
+          </Form>
+
       </PopoverContent>
     </Popover>
   );
